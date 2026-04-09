@@ -9,7 +9,7 @@ include: "/views/bq/*.view"
 
 explore: transactions_bq {
   group_label: "BRK2"
-  label: "🛍️ Cymbal Gadgets: Transactions & Sales"
+  label: "🛍 Electronic Gadgets: Transactions & Sales"
   description: "Core explore for analyzing transactions, marketing impact, and product reviews."
 
   join: product_reviews_bq {
