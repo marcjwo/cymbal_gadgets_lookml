@@ -97,6 +97,7 @@ view: transactions_bq {
   # --- Date Dimensions ---
   dimension_group: transaction {
     type: time
+    datatype: date
     timeframes: [date, week, month,month_name, quarter, year, raw, week_of_year]
     sql: ${TABLE}.transaction_date ;;
   }
@@ -344,6 +345,107 @@ view: transactions_bq {
       quantity,
       total_revenue
     ]
+  }
+  dimension: shipment_id {
+    type: string
+    sql: ${TABLE}.shipmentid ;;
+    group_label: "Logistics"
+    description: "Unique Identifier for the shipment"
+  }
+  dimension: shipping_method {
+    type: string
+    sql: ${TABLE}.shippingmethod ;;
+    group_label: "Logistics"
+  }
+  dimension: shipment_status {
+    type: string
+    sql: ${TABLE}.shipment_status ;;
+    group_label: "Logistics"
+  }
+  dimension_group: estimated_delivery {
+    type: time
+    timeframes: [raw, date, week, month, quarter, year]
+    convert_tz: no
+    datatype: date
+    sql: ${TABLE}.estimateddeliverydate ;;
+    group_label: "Logistics"
+  }
+  dimension_group: actual_delivery {
+    type: time
+    timeframes: [raw, date, week, month, quarter, year]
+    convert_tz: no
+    datatype: date
+    sql: ${TABLE}.actualdeliverydate ;;
+    group_label: "Logistics"
+  }
+  # Calculated Dimension: Was it delayed?
+  dimension: is_delayed {
+    type: yesno
+    sql: ${TABLE}.actualdeliverydate > ${TABLE}.estimateddeliverydate ;;
+    group_label: "Logistics"
+    description: "Yes if Actual Delivery Date is after Estimated Delivery Date"
+  }
+  # Calculated Dimension: Days Delayed
+  dimension: delay_days {
+    type: number
+    sql: DATE_DIFF(${TABLE}.actualdeliverydate, ${TABLE}.estimateddeliverydate, DAY) ;;
+    group_label: "Logistics"
+  }
+  # ==========================================
+  # 🏢 DISTRIBUTION CENTER
+  # ==========================================
+  dimension: distribution_center_name {
+    type: string
+    sql: ${TABLE}.distribution_center_name ;;
+    group_label: "Distribution Center"
+  }
+  dimension: distribution_center_city {
+    type: string
+    sql: ${TABLE}.distribution_center_city ;;
+    group_label: "Distribution Center"
+  }
+  dimension: distribution_center_state {
+    type: string
+    sql: ${TABLE}.distribution_center_state ;;
+    group_label: "Distribution Center"
+  }
+  dimension: distribution_center_country {
+    type: string
+    sql: ${TABLE}.distribution_center_country ;;
+    group_label: "Distribution Center"
+  }
+  # Rich Location Type for Map Visualizations
+  dimension: distribution_center_location {
+    type: location
+    sql_latitude: ${TABLE}.distribution_center_latitude ;;
+    sql_longitude: ${TABLE}.distribution_center_longitude ;;
+    group_label: "Distribution Center"
+  }
+  # ==========================================
+  # 📈 LOGISTICS METRICS (MEASURES)
+  # ==========================================
+  measure: count_shipments {
+    type: count_distinct
+    sql: ${shipment_id} ;;
+    group_label: "Logistics Metrics"
+  }
+  measure: count_delayed_shipments {
+    type: count
+    filters: [is_delayed: "Yes"]
+    group_label: "Logistics Metrics"
+  }
+  measure: average_delay_days {
+    type: average
+    sql: ${delay_days} ;;
+    value_format_name: decimal_1
+    group_label: "Logistics Metrics"
+  }
+  measure: percent_delayed {
+    type: number
+    sql: 1.0 * ${count_delayed_shipments} / NULLIF(${count_shipments}, 0) ;;
+    value_format_name: percent_1
+    group_label: "Logistics Metrics"
+    description: "Percentage of shipments that arrived after their estimated date"
   }
 }
 

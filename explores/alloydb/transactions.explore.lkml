@@ -25,4 +25,16 @@ explore: transactions {
     sql_on: ${transactions.saleschannelid} = ${d_saleschannels.saleschannelid} ;;
     relationship: many_to_one
   }
+  join: f_shipments {
+    sql_where: ${f_shipments.actualdeliverydate_date} <= now();;
+    type: left_outer
+    relationship: many_to_one # Assuming many line items in a transaction can link to one order shipment
+    sql_on: ${transactions.orderid} = ${f_shipments.orderid} ;;
+  }
+  # Join Distribution Centers
+  join: d_distribution_centers {
+    type: left_outer
+    relationship: many_to_one
+    sql_on: ${f_shipments.distributioncenterid} = ${d_distribution_centers.distributioncenterid} ;;
+  }
 }
