@@ -1,7 +1,7 @@
 include: "/views/alloydb/*.view"
 explore: transactions {
   label: "Global Gadgets Transactions - AlloyDB"
-  group_label: "BRK2"
+  # group_label: "BRK2"
   description: "This explore is based on Global Gadgets transactions hosted on AlloyDB - its enriched with products and stores data to deliver insights from that angle."
   from: f_transactions
   # sql_always_where: ${storeid} is not NULL ;;
