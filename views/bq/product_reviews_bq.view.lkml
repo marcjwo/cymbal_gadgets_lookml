@@ -70,6 +70,7 @@ view: product_reviews_bq {
     type: time
     timeframes: [date, week, month, year]
     sql: ${TABLE}.reviewdate ;;
+    datatype: date
   }
 
   # --- Measures on the Review Table itself ---
